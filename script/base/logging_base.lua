@@ -8,7 +8,11 @@ if is_authserver then
     filename = "authserver"
 end
 
-local logfile = io.open("log/" .. filename .. ".log","a+")
+local logfile = io.open(filename .. ".log","a+")
+
+if not logfile then
+	error("Could not open logfile")
+end
 
 function server.log(msg)
     assert(msg ~= nil)

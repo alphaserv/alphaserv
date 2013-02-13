@@ -1,0 +1,10 @@
+/nbproject/
+/debug_build/
+/release_build/
+/bin/monitor
+/bin/sauer_server
+/bin/utils/keygen
+/bin/utils/luapp
+/*.log
+/player_vars_journal
+/lib/lib*

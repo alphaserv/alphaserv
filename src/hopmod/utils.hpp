@@ -32,7 +32,7 @@ void delete_temp_files_on_shutdown(int);
 #define ORANGE "\f6"
 
 namespace hopmod{
-int revision();
+const char *revision();
 const char * build_date();
 } //namespace hopmod
 

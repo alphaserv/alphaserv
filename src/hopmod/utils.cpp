@@ -85,12 +85,12 @@ void delete_temp_files_on_shutdown(int type)
 
 namespace hopmod{
 
-int revision()
+const char *revision()
 {
-#if defined(REVISION) && (REVISION + 0)
+#if defined(REVISION)
     return REVISION;
 #endif
-    return -1;
+    return "Unkown";
 }
 
 const char * build_date()

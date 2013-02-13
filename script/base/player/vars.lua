@@ -1,6 +1,6 @@
 require "journal"
 
-local IPMASK_VARS_FILE = "log/player_vars_journal"
+local IPMASK_VARS_FILE = "player_vars_journal"
 
 local ipmask_vars = {}
 local ipmask_vars_by_ipmask = net.ipmask_table()
