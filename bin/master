@@ -1,0 +1,132 @@
+#!/bin/sh
+
+export AS_ROOT_DIR=$PWD
+
+if [ ! -e bin/sauer_server ]
+then
+	if [ "$1" = "start" ] || [ "x$1" = "x" ] || [ "$1" = "stop" ]; then
+		echo "Please run \"bin/server compile\" first."
+		exit 2
+	fi
+fi
+
+a=$1
+if [ "x$1" = "x-?" ] || [ "x$1" = "x?" ] || [ "x$1" = "x--help" ]
+then
+	a="help"
+fi
+
+if [ "x$1" = "x" ]
+then
+	a="start"
+fi
+
+case "$a" in
+    'help')
+    	if [ "x$2" = "x--wrong-usage" ]; then
+    		echo "Invalid option \"${3}\":"
+    	else
+			echo "usage:"
+		fi
+		echo "       $0 [start] [--no-statuslog]"
+		echo "       $0 stop"
+		echo "       $0 restart"
+		echo "       $0 status"
+		;;
+	'start')
+		cd instances;
+		for D in *; do
+			if [ -d "${D}" ]; then
+				echo "$D"
+				cd "$D";
+				. "bin/server" start;
+			fi
+		done
+		;;
+	'stop')
+		cd instances;
+		for D in *; do
+			if [ -d "${D}" ]; then
+				echo "$D"
+				cd "$D";
+				. "bin/server" stop;
+			fi
+		done
+		;;
+	'restart')
+		cd instances;
+		for D in *; do
+			if [ -d "${D}" ]; then
+				echo "$D"
+				cd "$D";
+				. "bin/server" restart;
+			fi
+		done
+		;;
+	'status')
+		cd instances;
+		for D in *; do
+			if [ -d "${D}" ]; then
+				echo "$D"
+				cd "$D";
+				. "bin/server" status;
+			fi
+		done
+		;;
+	'new')
+		NAME_SET=false
+		NAME=""
+		
+		while getopts “n:” OPTION
+		do
+			 case $OPTION in
+				 n)
+				 	NAME_SET=true
+				 	NAME=$OPTARG
+				 	;;
+			 esac
+		done
+		
+		if [ $NAME_SET = true ]; then
+			NAME=NAME
+		else
+			echo "Please enter the unique name of the server"
+			read NAME_NEW;
+			
+			NAME=$NAME_NEW
+		fi
+		
+		FROM=$PWD
+		DEST="instances/$NAME"
+
+		mkdir -p $DEST
+
+		mkdir $DEST/bin
+		for aa in utils env.sh sauer_server
+		do
+			ln -s $FROM/bin/$aa $DEST/bin/$aa
+		done
+		cp $FROM/bin/server $DEST/bin/
+		cp bin/monitor $DEST/bin/
+
+		ln -s $FROM/lib $DEST/lib
+		ln -s $FROM/script $DEST/script
+		ln -s $FROM/share $DEST/share
+		ln -s $FROM/mapinfo $DEST/mapinfo
+
+		mkdir $DEST/conf
+		mkdir $DEST/log
+		mkdir $DEST/log/game
+		mkdir $DEST/log/demo
+
+		cp $FROM/conf/server.conf $DEST/conf/server.conf
+		cp $FROM/conf/maps.conf $DEST/conf/maps.conf
+		;;
+    
+    *)
+    	#recursive wrong usage
+    	exec "$0" "help" "--wrong-usage" "$1"
+    	;;
+esac
+
+exit 0
