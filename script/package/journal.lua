@@ -47,7 +47,8 @@ function writer_open(filename)
 end
 
 function write(object, ...)
-    object._file:write(format_array({...}) .. ",\n")
+    arg.n = nil
+    object._file:write(format_array(arg) .. ",\n")
 end
 
 function format_string(value)
@@ -56,7 +57,7 @@ end
 
 function format_array(values)
     local formatted_values = {}
-    for index = 1, #values do
+    for index = 1, table.maxn(values) do
         formatted_values[#formatted_values + 1] = format_value(values[index])
     end
     return "{" .. table.concat(formatted_values, ",") .. "}"

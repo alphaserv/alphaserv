@@ -11,7 +11,7 @@
 local string = require("string")
 local base = _G
 local table = require("table")
-module("url")
+module("socket.url")
 
 -----------------------------------------------------------------------------
 -- Module version
