@@ -135,7 +135,7 @@ void bind_core_functions(lua_State * L, int T)
     bind_function(L, T, "get_gamemode_info", server::lua_gamemodeinfo);
     bind_function(L, T, "pausegame", (void (*)(bool))server::pausegame);
     
-    bind_function(L, T, "msg", server::sendservmsg);
+    bind_function(L, T, "msg", server::server_msg);
 
     bind_function(L, T, "changetime", server::changetime);
     bind_function(L, T, "changemap", server::changemap);
@@ -166,6 +166,9 @@ void bind_core_functions(lua_State * L, int T)
     bind_function(L, T, "revision", hopmod::revision);
     bind_function(L, T, "version", hopmod::build_date);
     bind_function(L, T, "build_date", hopmod::build_date);
+    bind_function(L, T, "build_time", hopmod::build_time);
+    // pureascii: don't use bind_prop with setter as long as it breaks the getter
+    bind_function(L, T, "set_mastermode", server::set_mastermode);
     
 }
 
@@ -251,14 +254,16 @@ static int string_accessor(lua_State * L)
     if(lua_gettop(L) > 0) // Set variable
     {
         if(READ_ONLY) luaL_error(L, "variable is read-only");
-        copystring(var, lua_tostring(L, 1));
+        convert2cube varcubeenc(lua_tostring(L, 1));
+        copystring(var, varcubeenc.str());
         event_varchanged(event_listeners(), boost::make_tuple(lua_tostring(L, lua_upvalueindex(2))));
         return 0;
     }
     else // Get variable
     {
         if(WRITE_ONLY) luaL_error(L, "variable is write-only");
-        lua::push(L, var);
+        convert2utf8 varutf8(var);
+        lua::push(L, varutf8.str());
         return 1;
     }
 }
@@ -359,8 +364,11 @@ void bind_core_variables(lua_State * L, int T)
     bind_ro_var(L, T, "map", server::smapname);
     bind_var(L, T, "server_password", server::serverpass);
     bind_var(L, T, "server_auth_domain", server::serverauth);
-    bind_prop(L, T, "timeleft", server::get_minutes_left, server::set_minutes_left);
-    bind_prop(L, T, "seconds_left", server::get_seconds_left, server::set_seconds_left);
+    // pureascii: don't use bind_prop with setter as long as it breaks the getter
+    //bind_prop(L, T, "timeleft", server::get_minutes_left, server::set_minutes_left);
+    //bind_prop(L, T, "seconds_left", server::get_seconds_left, server::set_seconds_left);
+    bind_prop<int>(L, T, "timeleft", server::get_minutes_left, NULL);
+    bind_prop<int>(L, T, "seconds_left", server::get_seconds_left, NULL);
     bind_var(L, T, "intermission", server::interm);
     bind_ro_var(L, T, "uptime", totalmillis);
     bind_ro_var(L, T, "gamemillis", server::gamemillis);
@@ -383,6 +391,7 @@ void bind_core_variables(lua_State * L, int T)
     bind_var(L, T, "allow_mastermode_veto", server::allow_mm_veto);
     bind_var(L, T, "allow_mastermode_locked", server::allow_mm_locked);
     bind_var(L, T, "allow_mastermode_private", server::allow_mm_private);
+    bind_var(L, T, "reset_mastermode", server::reset_mm);
     bind_var(L, T, "reserved_slots", server::reservedslots);
     bind_wo_var(L, T, "reserved_slots_password", server::slotpass);
     bind_ro_var(L, T, "reserved_slots_occupied", server::reservedslots_use);
@@ -415,6 +424,8 @@ void bind_core_variables(lua_State * L, int T)
     
     bind_var(L, T, "mapcrc", server::mcrc);
 
-    bind_prop<int>(L, T, "mastermode", server::get_mastermode, server::set_mastermode);
+    // pureascii: don't use bind_prop with setter as long as it breaks the getter
+    //bind_prop<int>(L, T, "mastermode", server::get_mastermode, server::set_mastermode);
+    bind_prop<int>(L, T, "mastermode", server::get_mastermode, NULL);
 }
 
